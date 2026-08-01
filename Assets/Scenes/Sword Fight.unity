@@ -1161,6 +1161,7 @@ MonoBehaviour:
   weaponPivot: {fileID: 116991960}
   swingDuration: 0.2
   swingAngle: 90
+  swordCollider: {fileID: 32459591}
 --- !u!1 &1576492655
 GameObject:
   m_ObjectHideFlags: 0

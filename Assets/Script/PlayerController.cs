@@ -18,6 +18,9 @@ public class PlayerController : MonoBehaviour
     public float swingDuration = 0.2f;
     public float swingAngle = 90f;
 
+    [Header("剣の当たり判定設定")]
+    [SerializeField] private Collider swordCollider;
+
     private bool isSwinging = false;
     private Quaternion initialWeaponRotation;
 
@@ -26,6 +29,11 @@ public class PlayerController : MonoBehaviour
         if (weaponPivot != null)
         {
             initialWeaponRotation = weaponPivot.localRotation;
+        }
+
+        if (swordCollider != null)
+        {
+            swordCollider.enabled = false;
         }
 
         // カメラが未設定の場合、自分自身の子オブジェクトから自動検索する
@@ -105,7 +113,7 @@ public class PlayerController : MonoBehaviour
         // スペースキーが押された瞬間を判定[cite: 1]
         if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
-            Debug.Log("スペース");
+            //Debug.Log("スペース");
             if (!isSwinging && weaponPivot != null)
             {
                 StartCoroutine(SwingWeapon());
@@ -116,6 +124,11 @@ public class PlayerController : MonoBehaviour
     IEnumerator SwingWeapon()
     {
         isSwinging = true;
+
+        if (swordCollider != null)
+        {
+            swordCollider.enabled = true;
+        }
 
         float elapsedTime = 0f;
         Quaternion targetRotation = initialWeaponRotation * Quaternion.Euler(swingAngle, 0, 0);
@@ -138,6 +151,12 @@ public class PlayerController : MonoBehaviour
         }
 
         weaponPivot.localRotation = initialWeaponRotation;
+
+        if (swordCollider != null)
+        {
+            swordCollider.enabled = false;
+        }
+
         isSwinging = false;
     }
 }
