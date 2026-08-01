@@ -57,6 +57,7 @@ public class PlayerController : MonoBehaviour
         // スペースキーが押された瞬間を判定
         if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
+            Debug.Log("スペース");
             if (!isSwinging && weaponPivot != null)
             {
                 StartCoroutine(SwingWeapon());
