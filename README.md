@@ -20,6 +20,7 @@ MR原始人フィットネス
 - 発表資料URL（必須）
 - デモURL（任意）
 - デモ動画（任意）
+- <video src="Video/com.UnityTechnologies.com.unity.template.urpblank-20260802-222731-0.mp4" controls width="100%"></video>
 - スクリーンショット（1枚以上推奨）
 
 ## システム構成
