@@ -71,5 +71,26 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 20520b2643ea6224f91d934658fa6224, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -4848480259489012067}
   m_SourcePrefab: {fileID: 100100000, guid: 20520b2643ea6224f91d934658fa6224, type: 3}
+--- !u!1 &8671892079193756601 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 20520b2643ea6224f91d934658fa6224, type: 3}
+  m_PrefabInstance: {fileID: 8401982114145447656}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &-4848480259489012067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8671892079193756601}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fcc3939f56580e4298caa7b73a561a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpearBehavior
+  lifeTime: 5

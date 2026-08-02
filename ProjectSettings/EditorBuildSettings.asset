@@ -5,24 +5,13 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-<<<<<<< HEAD
-  - enabled: 1
-=======
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 0
-<<<<<<< Updated upstream
     path: Assets/Scenes/Jump Rope.unity
     guid: 916819aee7008964d8540c352e253965
   - enabled: 0
-    path: Assets/Scenes/Main_menu.unity
-    guid: 1c90f15072ae5384ea470bb7b2e5c803
-=======
-    path: Assets/Scenes/Jump Rope.unity
-    guid: 916819aee7008964d8540c352e253965
-  - enabled: 0
->>>>>>> 2e4b45d80ef60baafa5f6e99f1bd10a1dfdc0a80
     path: Assets/Scenes/Main_menu.unity
     guid: 1c90f15072ae5384ea470bb7b2e5c803
   - enabled: 1
@@ -31,7 +20,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Javelin Throw.unity
     guid: f6abba7c6c97ac84f90c0570ed796d2d
->>>>>>> Stashed changes
   - enabled: 1
     path: Assets/Scenes/Sword Fight.unity
     guid: 8dace7831bdfd694c88f62ef03bd335c
@@ -39,7 +27,6 @@ EditorBuildSettings:
     path: Assets/Scenes/Strength Training.unity
     guid: 95aea8b4a017df146823c0fd4b50624b
   m_configObjects:
-    com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 6bb5c61b19ba9e94497563e1175ecebb, type: 2}
-    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: a2f1c8eb97ac7114983b6f3a3965543f, type: 2}
+    com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 4e27c2854fd8fc2478f05c155a7d0913, type: 2}
   m_UseUCBPForAssetBundles: 0
