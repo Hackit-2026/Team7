@@ -8,19 +8,19 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 0
-    path: Assets/Scenes/Jump Rope.unity
-    guid: 916819aee7008964d8540c352e253965
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/Main_menu.unity
     guid: 1c90f15072ae5384ea470bb7b2e5c803
   - enabled: 1
     path: Assets/Scenes/Jump Rope.unity
     guid: 916819aee7008964d8540c352e253965
   - enabled: 1
+<<<<<<< Updated upstream
     path: Assets/Scenes/Javelin Throw.unity
     guid: f6abba7c6c97ac84f90c0570ed796d2d
   - enabled: 1
+=======
+>>>>>>> Stashed changes
     path: Assets/Scenes/Sword Fight.unity
     guid: 8dace7831bdfd694c88f62ef03bd335c
   - enabled: 1

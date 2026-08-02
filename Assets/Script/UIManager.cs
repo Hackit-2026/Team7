@@ -1,24 +1,34 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
+using Meta.XR.MRUtilityKit; // Required for MR Utility Kit (MRUK)
 
 public class UIManager : MonoBehaviour
 {
-    [Header("表示を切り替えるパネル")]
+    [Header("UI Panels")]
     public GameObject title;
     public GameObject Game_Select;
     public GameObject Difficulty_Level;
 
-    [SerializeField] private GameObject normalObject; // Normalの表示物
-    [SerializeField] private GameObject hardObject;   // Hardの表示物
+    [SerializeField] private GameObject normalObject;
+    [SerializeField] private GameObject hardObject;
 
-    private bool isHard = false; // 現在の難易度（false: Normal, true: Hard）
+    [Header("MR / Surface Visual Effects")]
+    [Tooltip("Optional: Particle effect spawned on real-world walls/floors when a button is clicked.")]
+    [SerializeField] private GameObject clickSurfaceEffectPrefab;
 
+    private bool isHard = false;
     private string selectedBodyPart = "";
 
     void Start()
     {
         Showtitle();
+
+        // Ensure MRUK is ready in the scene
+        if (MRUK.Instance == null)
+        {
+            Debug.LogWarning("MRUK Instance not found. Spatial features will be disabled.");
+        }
     }
 
     public void Showtitle()
@@ -33,6 +43,7 @@ public class UIManager : MonoBehaviour
         title.SetActive(false);
         Game_Select.SetActive(true);
         Difficulty_Level.SetActive(false);
+        TriggerSurfaceEffect(); // Spawn effect on room surface
     }
 
     public void ShowDifficulty_Level()
@@ -40,30 +51,29 @@ public class UIManager : MonoBehaviour
         title.SetActive(false);
         Game_Select.SetActive(false);
         Difficulty_Level.SetActive(true);
+        TriggerSurfaceEffect();
     }
 
     public void ToggleDifficulty()
     {
-        isHard = !isHard; // 状態を反転
+        isHard = !isHard;
 
-        // それぞれの表示を切り替え
         if (normalObject != null) normalObject.SetActive(!isHard);
         if (hardObject != null) hardObject.SetActive(isHard);
 
-        // GameManager側にも現在の難易度を伝える
         if (GameManager.Instance != null)
         {
             string newDifficulty = isHard ? "Hard" : "Normal";
             GameManager.Instance.SetDifficulty(newDifficulty);
         }
+        TriggerSurfaceEffect();
     }
 
     public void SelectBodyPart(string bodyPart)
     {
-        selectedBodyPart = bodyPart; // 例: "Arm", "Leg" などを記憶
-        Debug.Log("選択された部位: " + selectedBodyPart);
+        selectedBodyPart = bodyPart;
+        Debug.Log("Selected Part: " + selectedBodyPart);
 
-        // 難易度選択画面を表示する
         ShowDifficulty_Level();
     }
 
@@ -71,39 +81,62 @@ public class UIManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(selectedBodyPart))
         {
-            Debug.LogError("部位が選択されていません！");
+            Debug.LogError("No body part selected!");
             return;
         }
 
         string sceneName = "";
 
-        // 選択された部位（selectedBodyPart）に応じて、飛ぶシーンを分岐させる
         switch (selectedBodyPart)
         {
             case "Arm":
-                sceneName = "Sword Fight"; // 実際の腕のシーン名に変更してください
+                sceneName = "Sword Fight";
                 break;
             case "Leg":
-                sceneName = "Jump Rope";       // 実際の脚のシーン名に変更してください
+                sceneName = "Jump Rope";
                 break;
             case "Shoulder":
-                sceneName = "Javelin Throw";  // 実際の肩のシーン名に変更してください
+                sceneName = "Javelin Throw";
                 break;
             case "Stomach":
-                sceneName = "Strength Training";    // 実際の腹のシーン名に変更してください
+                sceneName = "Strength Training";
                 break;
             default:
-                Debug.LogError("未知の部位が選択されています: " + selectedBodyPart);
+                Debug.LogError("Unknown body part: " + selectedBodyPart);
                 return;
         }
 
-        // GameManagerに難易度を渡す処理（必要に応じて）
         if (GameManager.Instance != null)
         {
-            Debug.Log("部位: " + selectedBodyPart + " / 難易度: " + GameManager.Instance.currentDifficulty + " でゲーム開始");
+            Debug.Log("Part: " + selectedBodyPart + " / Difficulty: " + GameManager.Instance.currentDifficulty + " -> Launching Game");
         }
 
-        // シーンを遷移
         SceneManager.LoadScene(sceneName);
+    }
+
+    /// <summary>
+    /// MR Feature: Finds the closest real-world room surface (floor) and spawns a visual effect there.
+    /// </summary>
+    private void TriggerSurfaceEffect()
+    {
+        if (MRUK.Instance == null || clickSurfaceEffectPrefab == null) return;
+
+        // Get the active room scanned by Meta Quest
+        MRUKRoom currentRoom = MRUK.Instance.GetCurrentRoom();
+        if (currentRoom == null) return;
+
+        Vector3 menuPosition = transform.position;
+        Ray ray = new Ray(menuPosition, Vector3.down);
+
+        // Fix: Create assignable variables for the out parameters
+        RaycastHit hit;
+        MRUKAnchor anchor;
+
+        // Correct MRUK Raycast call for Unity 6
+        if (currentRoom.Raycast(ray, Mathf.Infinity, LabelFilter.Included(MRUKAnchor.SceneLabels.FLOOR), out hit, out anchor))
+        {
+            // Spawn particle effect right on your real living room floor!
+            Instantiate(clickSurfaceEffectPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+        }
     }
 }
