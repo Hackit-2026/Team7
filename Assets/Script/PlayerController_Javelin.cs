@@ -1,127 +1,147 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController_Javelin : MonoBehaviour
 {
-    [Header("移動設定")]
+    [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 5f;
 
-    [Header("視点操作設定")]
-    [SerializeField] private Transform playerCamera; // プレイヤーの子にあるカメラを指定[cite: 2]
-    [SerializeField] private float mouseSensitivity = 2f;
-    [SerializeField] private float lookXLimit = 80f; // 見上げる/見下ろすの最大角度[cite: 2]
+    [Header("VR Camera Setup")]
+    [SerializeField] private Transform centerEyeAnchor;
 
-    [Header("槍の投擲設定")]
-    [SerializeField] private GameObject spearPrefab; // 槍のプレハブ
-    [SerializeField] private Transform spawnPoint;   // 槍の生成位置（手元など）
-    [SerializeField] private float throwPower = 20f; // 投擲の初速（威力）
+    [Header("Javelin Throw Settings")]
+    [SerializeField] private float throwPower = 20f;
+
+    [Header("Hand Tracking Setup (Right Hand)")]
+    [Tooltip("Drag and drop the RightHandAnchor or hand object from the Hierarchy.")]
+    [SerializeField] private Transform rightHandTransform;
+
+    [Tooltip("Speed threshold to trigger a throw when pushing the hand forward.")]
+    [SerializeField] private float throwThresholdSpeed = 2.5f; // Slightly lowered for easier tracking
+
+    [Tooltip("Cooldown time (seconds) between throws to prevent continuous shooting.")]
+    [SerializeField] private float throwCooldown = 1.0f;
 
     private CharacterController controller;
-    private float rotationX = 0f;
+    private float nextThrowTime = 0f;
+
+    // Variables to calculate physical hand speed manually
+    private Vector3 lastHandPosition;
+    private bool isFirstFrame = true;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
 
-        // カメラが未設定なら、子オブジェクトから自動取得[cite: 2]
-        if (playerCamera == null && Camera.main != null)
+        if (centerEyeAnchor == null)
         {
-            playerCamera = Camera.main.transform;
+            GameObject centerEye = GameObject.Find("CenterEyeAnchor");
+            if (centerEye != null)
+            {
+                centerEyeAnchor = centerEye.transform;
+            }
         }
-
-        // ゲーム開始時にマウスカーソルを画面中央にロックして非表示にする[cite: 2]
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
     }
 
     void Update()
     {
         HandleMovement();
-        HandleLook();
-        HandleThrow(); // 槍を投げる処理を追加
+        HandleHandTrackingThrow();
     }
 
-    // 移動処理（WASD / 矢印キー）[cite: 2]
     void HandleMovement()
     {
-        Keyboard keyboard = Keyboard.current;
-        if (keyboard == null) return;
+        Vector2 inputDir = OVRInput.Get(OVRInput.RawAxis2D.LThumbstick);
 
-        float x = 0f;
-        float z = 0f;
+        Vector3 forward = centerEyeAnchor != null ? centerEyeAnchor.forward : transform.forward;
+        Vector3 right = centerEyeAnchor != null ? centerEyeAnchor.right : transform.right;
 
-        if (keyboard.wKey.isPressed) z += 1f;
-        if (keyboard.sKey.isPressed) z -= 1f;
-        if (keyboard.aKey.isPressed) x -= 1f;
-        if (keyboard.dKey.isPressed) x += 1f;
+        forward.y = 0f;
+        right.y = 0f;
+        forward.Normalize();
+        right.Normalize();
 
-        Vector3 move = transform.right * x + transform.forward * z;
-        controller.Move(move * moveSpeed * Time.deltaTime);
+        Vector3 moveDirection = (forward * inputDir.y + right * inputDir.x).normalized;
 
-        if (controller.isGrounded == false)
+        controller.Move(moveDirection * moveSpeed * Time.deltaTime);
+
+        if (!controller.isGrounded)
         {
             controller.Move(Vector3.down * 9.81f * Time.deltaTime);
         }
     }
 
-    // 視点操作処理（マウス移動によるカメラとキャラクターの回転）[cite: 2]
-    void HandleLook()
+    // New: Calculate hand velocity manually by comparing frame positions
+    void HandleHandTrackingThrow()
     {
-        Mouse mouse = Mouse.current;
-        if (mouse == null) return;
+        if (rightHandTransform == null) return;
 
-        Vector2 mouseDelta = mouse.delta.ReadValue() * mouseSensitivity * 0.1f;
-
-        rotationX -= mouseDelta.y;
-        rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
-
-        if (playerCamera != null)
+        // Skip the first frame to establish a baseline position
+        if (isFirstFrame)
         {
-            playerCamera.localRotation = Quaternion.Euler(rotationX, 0f, 0f);
+            lastHandPosition = rightHandTransform.position;
+            isFirstFrame = false;
+            return;
         }
 
-        transform.Rotate(Vector3.up * mouseDelta.x);
-    }
+        // Calculate the physical distance the hand moved in this single frame
+        Vector3 handMovementThisFrame = rightHandTransform.position - lastHandPosition;
 
-    // スペースキーで槍を投げる処理
-    void HandleThrow()
-    {
-        Keyboard keyboard = Keyboard.current;
-        if (keyboard == null) return;
+        // Convert to speed per second (meters per second)
+        Vector3 handVelocity = handMovementThisFrame / Time.deltaTime;
 
-        if (keyboard.spaceKey.wasPressedThisFrame)
+        // Save current position for the next frame calculation
+        lastHandPosition = rightHandTransform.position;
+
+        if (Time.time < nextThrowTime) return;
+
+        // Calculate how fast the hand is moving FORWARD relative to where the camera is looking
+        Vector3 forwardDirection = centerEyeAnchor != null ? centerEyeAnchor.forward : transform.forward;
+        float forwardSpeed = Vector3.Dot(handVelocity, forwardDirection);
+
+        // If the calculated forward push speed is faster than the threshold, FIRE!
+        if (forwardSpeed > throwThresholdSpeed)
         {
-            ThrowSpear();
+            ThrowSpear(rightHandTransform.position);
+            nextThrowTime = Time.time + throwCooldown;
         }
     }
 
-    // 槍の生成と発射
-    void ThrowSpear()
+    void ThrowSpear(Vector3 spawnPos)
     {
-        Vector3 spawnPos = spawnPoint != null ? spawnPoint.position : transform.position + transform.forward;
-
-        // カメラの水平方向の向きを計算
-        Vector3 flatForward = playerCamera != null ? playerCamera.forward : transform.forward;
-        flatForward.y = 0f;
-        flatForward.Normalize();
+        Vector3 throwDirection = centerEyeAnchor != null ? centerEyeAnchor.forward : transform.forward;
+        throwDirection.y += 0.15f; // Slight realistic throw arc angle
+        throwDirection.Normalize();
 
         Quaternion spawnRot = Quaternion.identity;
-        if (flatForward != Vector3.zero)
+        if (throwDirection != Vector3.zero)
         {
-            Quaternion lookRot = Quaternion.LookRotation(flatForward);
-            spawnRot = lookRot * Quaternion.Euler(90, 0, 0); // プレハブのオフセット（例: X90度）を考慮
+            Quaternion lookRot = Quaternion.LookRotation(throwDirection);
+            spawnRot = lookRot * Quaternion.Euler(90, 0, 0);
         }
 
-        // 【変更】Instantiate の代わりにオブジェクトプールから取得する
-        GameObject spear = SpearPool.Instance.GetSpear(spawnPos, spawnRot);
-
-        Rigidbody rb = spear.GetComponent<Rigidbody>();
-        if (rb != null)
+        if (SpearPool.Instance != null)
         {
-            Vector3 throwDirection = playerCamera != null ? playerCamera.forward : transform.forward;
+            GameObject spear = SpearPool.Instance.GetSpear(spawnPos, spawnRot);
+
+            Rigidbody rb = spear.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.AddForce(throwDirection * throwPower, ForceMode.Impulse);
+            }
+        }
+        else
+        {
+            // Fallback: If SpearPool is missing in the scene, directly instantiate a spear temporary to prevent blocking the game!
+            Debug.LogWarning("SpearPool.Instance is missing! Spawning a fallback javelin directly.");
+            GameObject fallbackSpear = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            fallbackSpear.transform.position = spawnPos;
+            fallbackSpear.transform.rotation = spawnRot;
+            fallbackSpear.transform.localScale = new Vector3(0.05f, 1f, 0.05f);
+            Rigidbody rb = fallbackSpear.AddComponent<Rigidbody>();
             rb.AddForce(throwDirection * throwPower, ForceMode.Impulse);
-            rb.linearVelocity = throwDirection * throwPower;
+            Destroy(fallbackSpear, 5.0f); // Auto destroy after 5 seconds
         }
     }
 }
