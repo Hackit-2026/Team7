@@ -5,7 +5,7 @@ public class SwordCollision : MonoBehaviour
     public int Damage = 0;
 
     private bool hasHit = false;
-    private Collider swordCollider; // 【追加】自身のコライダーを保持する変数
+    private Collider swordCollider;
 
     void Start()
     {
@@ -26,7 +26,7 @@ public class SwordCollision : MonoBehaviour
             Debug.Log(Damage);
             hasHit = true;
 
-            // 【修正点】当たった瞬間にコライダーをオフにして多重ヒット・それ以降のブロックを防ぐ
+            // 当たった瞬間にコライダーをオフにして多重ヒット・それ以降のブロックを防ぐ
             if (swordCollider != null) swordCollider.enabled = false;
         }
         // 触れたオブジェクトのTagが "Body" だった場合
@@ -37,12 +37,13 @@ public class SwordCollision : MonoBehaviour
             Debug.Log(Damage);
             hasHit = true;
 
-            // 【修正点】当たった瞬間にコライダーをオフにする
+            // 当たった瞬間にコライダーをオフにする
             if (swordCollider != null) swordCollider.enabled = false;
         }
     }
 
-    void OnEnable()
+    // 【修正点】PlayerControllerから剣を振るたびに呼ばれるリセット用メソッド
+    public void ResetHit()
     {
         hasHit = false;
     }

@@ -21,6 +21,10 @@ public class PlayerController : MonoBehaviour
     [Header("剣の当たり判定設定")]
     [SerializeField] private Collider swordCollider;
 
+    [Header("ガード設定")]
+    public Vector3 guardAngle = new Vector3(-45f, 0, 90f); // 枝を横向きにする角度
+    public bool isGuarding = false;
+
     private bool isSwinging = false;
     private Quaternion initialWeaponRotation;
 
@@ -51,6 +55,7 @@ public class PlayerController : MonoBehaviour
     {
         Move();
         Look();
+        HandleGuard();
         Attack();
     }
 
@@ -108,6 +113,29 @@ public class PlayerController : MonoBehaviour
         transform.Rotate(Vector3.up * mouseDelta.x);
     }
 
+    void HandleGuard()
+    {
+        // 攻撃中（剣を振っている最中）はガードの動作をしない
+        if (isSwinging) return;
+
+        // 右クリックが押されているか判定
+        if (Mouse.current != null && Mouse.current.rightButton.isPressed)
+        {
+            isGuarding = true;
+
+            // 指定した角度（横向き）に滑らかに回転させる
+            Quaternion targetRotation = initialWeaponRotation * Quaternion.Euler(guardAngle);
+            weaponPivot.localRotation = Quaternion.Lerp(weaponPivot.localRotation, targetRotation, Time.deltaTime * 15f);
+        }
+        else
+        {
+            isGuarding = false;
+
+            // 攻撃していない＆ガードしていない時は、滑らかに元の角度に戻す
+            weaponPivot.localRotation = Quaternion.Lerp(weaponPivot.localRotation, initialWeaponRotation, Time.deltaTime * 15f);
+        }
+    }
+
     void Attack()
     {
         // スペースキーが押された瞬間を判定[cite: 1]
@@ -128,6 +156,12 @@ public class PlayerController : MonoBehaviour
         if (swordCollider != null)
         {
             swordCollider.enabled = true;
+
+            SwordCollision collisionScript = swordCollider.GetComponent<SwordCollision>();
+            if (collisionScript != null)
+            {
+                collisionScript.ResetHit();
+            }
         }
 
         float elapsedTime = 0f;
