@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< Updated upstream:Assets/Prefab/spear 2.prefab.meta
 guid: 7adb5c11997e1a04a99dfa513226016c
+========
+guid: 70e4a9435b4cb5e4cac30d997160adf3
+>>>>>>>> Stashed changes:Assets/Prefab/spear 1.prefab.meta
 PrefabImporter:
   externalObjects: {}
   userData: 

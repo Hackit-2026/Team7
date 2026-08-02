@@ -99,53 +99,29 @@ public class PlayerController_Javelin : MonoBehaviour
     // 槍の生成と発射
     void ThrowSpear()
     {
-        if (spearPrefab == null)
-        {
-            Debug.LogWarning("Spear Prefabが設定されていません。");
-            return;
-        }
-
-        // 生成位置が未指定の場合はカメラの位置を基準にする
         Vector3 spawnPos = spawnPoint != null ? spawnPoint.position : transform.position + transform.forward;
 
-        // 1. 槍のプレハブを生成
-        GameObject spear = Instantiate(spearPrefab);
-        spear.transform.position = spawnPos;
+        // カメラの水平方向の向きを計算
+        Vector3 flatForward = playerCamera != null ? playerCamera.forward : transform.forward;
+        flatForward.y = 0f;
+        flatForward.Normalize();
+
+        Quaternion spawnRot = Quaternion.identity;
+        if (flatForward != Vector3.zero)
+        {
+            Quaternion lookRot = Quaternion.LookRotation(flatForward);
+            spawnRot = lookRot * Quaternion.Euler(90, 0, 0); // プレハブのオフセット（例: X90度）を考慮
+        }
+
+        // 【変更】Instantiate の代わりにオブジェクトプールから取得する
+        GameObject spear = SpearPool.Instance.GetSpear(spawnPos, spawnRot);
 
         Rigidbody rb = spear.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.isKinematic = false;
-            rb.useGravity = true;
-
-            // 2. カメラの向いている方向（視線の向き）を入射角度として取得
-            // カメラが存在する場合はカメラの forward、なければプレイヤーの forward を利用
             Vector3 throwDirection = playerCamera != null ? playerCamera.forward : transform.forward;
-
-            // 3. 力を加えて放物線を描かせて飛ばす
             rb.AddForce(throwDirection * throwPower, ForceMode.Impulse);
-
-            // 4. 槍の向きを進行方向に合わせる
-            Vector3 flatForward = playerCamera != null ? playerCamera.forward : transform.forward;
-            flatForward.y = 0f;
-            flatForward.Normalize();
-
-            if (flatForward != Vector3.zero)
-            {
-                // カメラの向く方向（Y軸回転）を計算
-                Quaternion lookRot = Quaternion.LookRotation(flatForward);
-
-                // ★ポイント: プレハブ側で調整した「X軸90度などの傾き（ローカル回転）」を維持するため、
-                // 生成されたオブジェクトの「現在のローカル回転（またはプレハブの元々の回転）」を後から掛け合わせる
-                // ※もしプレハブ内の子オブジェクトにモデルが入っている場合は spear.transform.rotation のままでOKです
-
-                // 例：進行方向を向きつつ、プレハブが元々持っていたX軸の傾き（例: Xに90度）を保持させたい場合
-                // spear.transform.rotation = lookRot * Quaternion.Euler(90, 0, 0); 
-
-                // プレハブ自体の初期回転（インスタンス化した直後の状態）のローカル回転をベースにする場合：
-                // 一度生成されたときの回転を基準にするなら、以下のように書くことでプレハブの初期アライメントを維持できます。
-                spear.transform.rotation = lookRot * spear.transform.localRotation;
-            }
+            rb.linearVelocity = throwDirection * throwPower;
         }
     }
 }
