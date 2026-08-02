@@ -9,10 +9,20 @@ public class MammothTarget : MonoBehaviour
     [SerializeField] private int maxHitCount = 5; // 何回当てたら倒せるか
     private int currentHitCount;
 
+    [Header("サウンド設定")]
+    [SerializeField] private AudioClip hitSound; // 槍が刺さったときのSE
+    private AudioSource audioSource;
+
     void Start()
     {
         // 初期状態のヒットポイントを設定
         currentHitCount = maxHitCount;
+
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null && hitSound != null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
     }
 
     // 槍（Collider）が当たったときの処理
@@ -23,6 +33,11 @@ public class MammothTarget : MonoBehaviour
         {
             currentHitCount--;
             Debug.Log($"マンモスに槍が当たった！ 残り耐久値: {currentHitCount}/{maxHitCount}");
+
+            if (hitSound != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(hitSound);
+            }
 
             // 当たった槍の動きを止めてマンモスの子供にする（刺さる演出）
             Rigidbody spearRb = collision.gameObject.GetComponent<Rigidbody>();
