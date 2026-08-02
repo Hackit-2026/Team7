@@ -1,80 +1,101 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerController_Jump_Rope : MonoBehaviour
 {
     private Rigidbody rb;
-    [Header("ジャンプの強さ")]
-    public float jumpForce = 5f;
 
-    [Header("接地判定用（オプション）")]
+    [Header("Jump Settings")]
+    public float jumpForce = 5f;
     public bool isGrounded = true;
 
-    [Header("視点操作・カメラ設定")]
-    [SerializeField] private Transform playerCamera; // プレイヤーの子階層にあるカメラ
-    [SerializeField] private float mouseSensitivity = 2f; // マウス感度
-    [SerializeField] private float lookXLimit = 80f; // 上下の視点制限角度
-    private float rotationX = 0f;
+    [Header("VR Camera Setup")]
+    [SerializeField] private Transform centerEyeAnchor;
+
+    [Header("Jump Detection Settings")]
+    [Tooltip("Required upward speed (meters per second) to trigger a jump.")]
+    [SerializeField] private float jumpThresholdSpeed = 1.8f;
+
+    [Tooltip("Minimum upward movement (meters) in a single frame to filter out tiny shakes.")]
+    [SerializeField] private float minDeltaY = 0.015f;
+
+    [Header("Game Manager Link")]
+    [SerializeField] private RopeJumpGameManager gameManager;
+
+    private float lastCameraY;
 
     void Start()
     {
+        // Get Rigidbody from this object directly
         rb = GetComponent<Rigidbody>();
-
-        // カメラが未設定の場合、自分自身の子オブジェクトから自動検索する
-        if (playerCamera == null && GetComponentInChildren<Camera>() != null)
+        if (rb == null)
         {
-            playerCamera = GetComponentInChildren<Camera>().transform;
+            Debug.LogError("This object does not have a Rigidbody component!");
         }
 
-        // ゲーム開始時にマウスカーソルを画面中央にロックして非表示にする
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        // Auto-find CenterEyeAnchor
+        if (centerEyeAnchor == null)
+        {
+            GameObject centerEye = GameObject.Find("CenterEyeAnchor");
+            if (centerEye != null)
+            {
+                centerEyeAnchor = centerEye.transform;
+            }
+            else if (GetComponentInChildren<Camera>() != null)
+            {
+                centerEyeAnchor = GetComponentInChildren<Camera>().transform;
+            }
+        }
+
+        if (centerEyeAnchor != null)
+        {
+            lastCameraY = centerEyeAnchor.localPosition.y;
+        }
     }
 
     void Update()
     {
-        Keyboard keyboard = Keyboard.current;
-        if (keyboard == null) return;
+        if (centerEyeAnchor == null || rb == null) return;
 
-        if (keyboard.spaceKey.wasPressedThisFrame)
+        float currentCameraY = centerEyeAnchor.localPosition.y;
+
+        // 1. Calculate the movement in this frame
+        float deltaY = currentCameraY - lastCameraY;
+
+        // 2. Convert to speed per second (meters per second)
+        float upwardSpeed = deltaY / Time.deltaTime;
+
+        // 3. Trigger jump only if conditions are met
+        if (isGrounded && deltaY > minDeltaY && upwardSpeed > jumpThresholdSpeed)
         {
             Jump();
         }
 
-        HandleLook();
+        lastCameraY = currentCameraY;
     }
 
     void Jump()
     {
+        // Reset vertical velocity of this object and apply force
+        // Compatible with both rb.velocity and rb.linearVelocity (Unity 6)
+#if UNITY_6_0_OR_NEWER
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+#else
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+#endif
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
 
         isGrounded = false;
-    }
 
-    void HandleLook()
-    {
-        Mouse mouse = Mouse.current;
-        if (mouse == null) return;
-
-        // マウスの移動量を取得
-        Vector2 mouseDelta = mouse.delta.ReadValue() * mouseSensitivity * 0.1f;
-
-        // 1. 上下の視点移動（カメラのみを上下に回転）
-        rotationX -= mouseDelta.y;
-        rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
-
-        if (playerCamera != null)
+        // Notify GameManager to decrease remaining jumps
+        if (gameManager != null)
         {
-            playerCamera.localRotation = Quaternion.Euler(rotationX, 0f, 0f);
+            gameManager.OnPlayerJumped();
         }
-
-        // 2. 左右の視点移動（プレイヤー本体を左右に回転させることでカメラも一緒に追従する）
-        transform.Rotate(Vector3.up * mouseDelta.x);
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        // 床についたオブジェクトのタグが "Ground" の場合
+        // Ground detection via physical collision
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
