@@ -60,22 +60,50 @@ public class UIManager : MonoBehaviour
 
     public void SelectBodyPart(string bodyPart)
     {
-        selectedBodyPart = bodyPart; // 部位を記憶
+        selectedBodyPart = bodyPart; // 例: "Arm", "Leg" などを記憶
         Debug.Log("選択された部位: " + selectedBodyPart);
 
-        // シーンは変えずに、難易度選択画面を表示する
+        // 難易度選択画面を表示する
         ShowDifficulty_Level();
     }
 
-    public void StartGameScene(string sceneName)
+    public void StartGameSceneAuto()
     {
-        // GameManagerに部位のデータも渡しておきたい場合（必要に応じて）
-        if (GameManager.Instance != null)
+        if (string.IsNullOrEmpty(selectedBodyPart))
         {
-            // GameManager側で部位を保持する変数があればここに渡せます
+            Debug.LogError("部位が選択されていません！");
+            return;
         }
 
-        // シーンを遷移する
+        string sceneName = "";
+
+        // 選択された部位（selectedBodyPart）に応じて、飛ぶシーンを分岐させる
+        switch (selectedBodyPart)
+        {
+            case "Arm":
+                sceneName = "Sword Fight"; // 実際の腕のシーン名に変更してください
+                break;
+            case "Leg":
+                sceneName = "Jump Rope";       // 実際の脚のシーン名に変更してください
+                break;
+            case "Shoulder":
+                sceneName = "Javelin Throw";  // 実際の肩のシーン名に変更してください
+                break;
+            case "Stomach":
+                sceneName = "Strength Training";    // 実際の腹のシーン名に変更してください
+                break;
+            default:
+                Debug.LogError("未知の部位が選択されています: " + selectedBodyPart);
+                return;
+        }
+
+        // GameManagerに難易度を渡す処理（必要に応じて）
+        if (GameManager.Instance != null)
+        {
+            Debug.Log("部位: " + selectedBodyPart + " / 難易度: " + GameManager.Instance.currentDifficulty + " でゲーム開始");
+        }
+
+        // シーンを遷移
         SceneManager.LoadScene(sceneName);
     }
 }
