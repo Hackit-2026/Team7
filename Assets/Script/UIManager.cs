@@ -14,6 +14,8 @@ public class UIManager : MonoBehaviour
 
     private bool isHard = false; // 現在の難易度（false: Normal, true: Hard）
 
+    private string selectedBodyPart = "";
+
     void Start()
     {
         Showtitle();
@@ -48,7 +50,7 @@ public class UIManager : MonoBehaviour
         if (normalObject != null) normalObject.SetActive(!isHard);
         if (hardObject != null) hardObject.SetActive(isHard);
 
-        // ★追加：GameManager側にも現在の難易度を伝える
+        // GameManager側にも現在の難易度を伝える
         if (GameManager.Instance != null)
         {
             string newDifficulty = isHard ? "Hard" : "Normal";
@@ -56,8 +58,24 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void ChangeScene(string sceneName)
+    public void SelectBodyPart(string bodyPart)
     {
+        selectedBodyPart = bodyPart; // 部位を記憶
+        Debug.Log("選択された部位: " + selectedBodyPart);
+
+        // シーンは変えずに、難易度選択画面を表示する
+        ShowDifficulty_Level();
+    }
+
+    public void StartGameScene(string sceneName)
+    {
+        // GameManagerに部位のデータも渡しておきたい場合（必要に応じて）
+        if (GameManager.Instance != null)
+        {
+            // GameManager側で部位を保持する変数があればここに渡せます
+        }
+
+        // シーンを遷移する
         SceneManager.LoadScene(sceneName);
     }
 }
