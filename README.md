@@ -15,16 +15,20 @@ MR原始人フィットネス
 
 ## デモ
 
-以下を掲載してください。
+<img width="3840" height="2160" alt="com UnityTechnologies com unity template urpblank-20260803-093814" src="https://github.com/user-attachments/assets/545ac472-d745-485b-8df3-6f988a71f360" />
+（チャンバラゲーム）
 
-- 発表資料URL（必須）
-- デモURL（任意）
-- デモ動画（任意）
-- スクリーンショット（1枚以上推奨）
+<img width="3840" height="2160" alt="com UnityTechnologies com unity template urpblank-20260803-094055" src="https://github.com/user-attachments/assets/10ccc16d-98e8-405a-a602-1120904e9586" />
+（縄跳びゲーム）
+
+<img width="3840" height="2160" alt="com UnityTechnologies com unity template urpblank-20260803-094627" src="https://github.com/user-attachments/assets/588c960a-fa74-4e24-ae29-4b85e93310ca" />
+（槍投げゲーム）
 
 ## システム構成
 
-アプリケーション全体の構成が分かる図や説明を記載してください。
+<img width="1280" height="720" alt="システム設計" src="https://github.com/user-attachments/assets/116e5b97-40b8-4b8d-b802-9132eaf8bc5c" />
+メインメニューからすべてのゲームにつながっており選択した部位によって映るシーンが変わる
+
 
 ## 背景・課題
 
@@ -56,24 +60,15 @@ AI / API：Meta XR SDK、Scene Understanding API、OpenXR、VPS（Visual Positio
 その他：Blender（3Dモデル作成）、Shader Graph（マテリアル作成）、GitHub Desktop（バージョン管理）
 
 ## 今後の展望
-「ゲーム４：薪割り」の追加や、各ゲームのHPやエフェクトの実装をしてより面白味がありやりこめるゲームにしたいです！
+「ゲーム４：薪割り」の追加や、各ゲームのHPやエフェクトの実装をしてより面白味があり<img width="3840" height="2160" alt="com UnityTechnologies com unity template urpblank-20260803-094627" src="https://github.com/user-attachments/assets/4a252425-8264-42e9-ae15-44515b79932c" />
+<img width="3840" height="2160" alt="com UnityTechnologies com unity template urpblank-20260803-094055" src="https://github.com/user-attachments/assets/5e781bd7-1b4f-498b-a43f-58f8e8142cd2" />
+<img width="3840" height="2160" alt="com UnityTechnologies com unity template urpblank-20260803-093814" src="https://github.com/user-attachments/assets/be3b77c9-0084-4288-ae16-bea4cd7a15b1" />
+やりこめるゲームにしたいです！
 
 ## セットアップ方法
 
-ローカルで実行する場合の手順を記載してください。
+Meta Quest3を準備して接続できるようにする
 
-例
-
-```bash
-git clone <repository-url>
-cd <repository-name>
-
-# 必要なライブラリをインストール
-...
-
-# 起動
-...
-```
 
 ## メンバー
 
