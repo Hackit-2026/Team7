@@ -60,9 +60,7 @@ AI / API：Meta XR SDK、Scene Understanding API、OpenXR、VPS（Visual Positio
 その他：Blender（3Dモデル作成）、Shader Graph（マテリアル作成）、GitHub Desktop（バージョン管理）
 
 ## 今後の展望
-「ゲーム４：薪割り」の追加や、各ゲームのHPやエフェクトの実装をしてより面白味があり<img width="3840" height="2160" alt="com UnityTechnologies com unity template urpblank-20260803-094627" src="https://github.com/user-attachments/assets/4a252425-8264-42e9-ae15-44515b79932c" />
-<img width="3840" height="2160" alt="com UnityTechnologies com unity template urpblank-20260803-094055" src="https://github.com/user-attachments/assets/5e781bd7-1b4f-498b-a43f-58f8e8142cd2" />
-<img width="3840" height="2160" alt="com UnityTechnologies com unity template urpblank-20260803-093814" src="https://github.com/user-attachments/assets/be3b77c9-0084-4288-ae16-bea4cd7a15b1" />
+「ゲーム４：薪割り」の追加や、各ゲームのHPやエフェクトの実装をしてより面白味があり
 やりこめるゲームにしたいです！
 
 ## セットアップ方法
